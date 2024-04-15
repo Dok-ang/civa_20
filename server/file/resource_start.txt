@@ -1,0 +1,1 @@
+{"action": "resource", "people": 100, "food": 300, "tree": 10, "stone": 5, "iron": 0, "gold": 300, "oil": 0}
