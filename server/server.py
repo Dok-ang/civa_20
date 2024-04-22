@@ -10,6 +10,9 @@ connection = mysql.connector.connect(
 # Створення об'єкта курсора
 cursor = connection.cursor()
 list_resource=["people","food","tree","stone","oil","iron","gold"]
+list_buildings=["farm","sawmill","mine_stone","oil_well","mine_iron","mine_gold","barrack_infantry",'shooting_range','barrack_berserk']
+list_warriors=["infantry","bowman","berserk"]
+
 import time
 import random
 import socket
