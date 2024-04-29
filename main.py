@@ -349,3 +349,5 @@ class CivilizationApp(App):
         return all_windows
 if __name__=="__main__": # якщо запуска'ємо даний файл не як модуль
     CivilizationApp().run() # то запустимо програму на основи головного класу
+
+irina = 'prodavec'
