@@ -10,7 +10,8 @@ connection = mysql.connector.connect(
 # Створення об'єкта курсора
 cursor = connection.cursor()
 list_resource=["people","food","tree","stone","oil","iron","gold"]
-list_buildings=["farm","sawmill","mine_stone","oil_well","mine_iron","mine_gold","barrack_infantryman","shooting_range","barrack_berserker"]
+buildings_resource=["farm","sawmill","mine_stone","oil_well","mine_iron","mine_gold"]
+buildings_army=["barrack_infantryman","shooting_range","barrack_berserker"]
 list_army=["infantryman","bowman","berserker"]
 import time
 import random
@@ -44,26 +45,52 @@ async def new_connect(input_message,output_message):
             inf.setdefault("all_resource",content)
             resource_mining_speed={}
             for i in range(len(list_resource)):
-                resource_mining_speed.setdefault(list_resource[i],content[i][2])
+                resource_mining_speed.setdefault(list_resource[i],content[i][2]) # список з інформацією про всі будинки для добування ресурсів
             #print(content)
             cursor.execute(f"SELECT * FROM buildings")
             content_build = cursor.fetchall()
-
-            for table_name in list_resource:
-                cursor.execute(f"SELECT * FROM {table_name} WHERE id_user=%s",(command["id"],))
+            all_build={}
+            time_now=int(time.time())
+            for index in range(len(buildings_resource)):
+                all_build.setdefault(buildings_resource[index],content_build[index][2::])
+            #print(all_build)
+            
+            inf.setdefault("people",8) #######################################################################
+            for index in range(1,len(list_resource)):
+                cursor.execute(f"SELECT * FROM {list_resource[index]} WHERE id_user=%s",(command["id"],))
                 #print(content)
                 content2 = cursor.fetchall()
                 #print(content)
                 count=content2[0][1]
-                last_update=content2[0][2]
-                time_now=int(time.time())
+                last_update=content2[0][2] 
                 time_pas=time_now-last_update
-                
-                count+=time_pas//resource_mining_speed[table_name]
-                last_update=time_now-time_pas%resource_mining_speed[table_name]
-                inf.setdefault(table_name,count)
-                cursor.execute(f"UPDATE {table_name} SET count=%s WHERE id_user=%s",(count,command["id"]))
-                cursor.execute(f"UPDATE {table_name} SET last_update=%s WHERE id_user=%s",(last_update,command["id"]))
+                name=buildings_resource[index-1]
+                building_speed=all_build[name][0] # швидкість побудови
+                could_build= time_pas//building_speed # могли збудувати
+                cursor.execute(f"SELECT * FROM {buildings_resource[index-1]} WHERE id_user=%s",(command["id"],)) 
+                info_build=cursor.fetchall() # дані користувача по будівлі
+                print(info_build)
+                is_building=info_build[0][3] # скільки будується
+                count_built_now=info_build[0][1] # було раніше збудовано
+                if could_build>=is_building:
+                    have_built=is_building # збудували
+                else:
+                    have_built=could_build
+                building_process_time=have_built*is_building # час процесу побудови, для ариф. прогресії
+                min=count_built_now*building_process_time//resource_mining_speed[list_resource[index]] # min могли збуд
+                max=(count_built_now+have_built)*building_process_time//resource_mining_speed[list_resource[index]] # max могли збуд
+                average_resource_count=(min+max)//2 # середнє добування ресурсів арифметичної прогесії
+
+                last_update=content2[0][2]+building_process_time # рахуємо що далі добувається
+                time_pas=time_now-last_update
+
+
+                count+=time_pas//resource_mining_speed[list_resource[index]]+average_resource_count
+
+                last_update=time_now-time_pas%resource_mining_speed[list_resource[index]]
+                inf.setdefault(list_resource[index],count)
+                cursor.execute(f"UPDATE {list_resource[index]} SET count=%s WHERE id_user=%s",(count,command["id"]))
+                cursor.execute(f"UPDATE {list_resource[index]} SET last_update=%s WHERE id_user=%s",(last_update,command["id"]))
             #print(inf)
             output_message.write(json.dumps(inf).encode("utf-8"))
         else:
@@ -87,8 +114,10 @@ async def new_connect(input_message,output_message):
             cursor.execute("INSERT INTO oil (id_user, count, last_update) VALUES (%s, %s, %s)", (user_id,start_resource["oil"],time_now))
             
             
-            for building in list_buildings:
-                cursor.execute(f"INSERT INTO {building} (id_user, count, buildings_time, new_buildings_count) VALUES (%s, %s, %s, %s)", (user_id,0,time_now,0))
+            for building in buildings_resource:
+                cursor.execute(f"INSERT INTO {building} (id_user, count, buildings_time, new_buildings_count) VALUES (%s, %s, %s, %s)", (user_id,100,time_now,0))
+            for building in buildings_army:
+                cursor.execute(f"INSERT INTO {building} (id_user, count, buildings_time, new_buildings_count) VALUES (%s, %s, %s, %s)", (user_id,100,time_now,0))
             for army in list_army:
                 cursor.execute(f"INSERT INTO {army} (id_user, count, army_time, new_army_count) VALUES (%s, %s, %s, %s)", (user_id,0,time_now,0))
             connection.commit()

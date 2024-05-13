@@ -120,7 +120,7 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
     iron INT NOT NULL,
     gold INT NOT NULL  )""".format(buildings))
 # mining_speed - швидкість побудови
-# resource_multiplier - множник за кожен ресурс
+# resource_multiplier - доданок за кожен ресурс
 
 # Вставка даних в таблицю
 command = "INSERT INTO {0} (name, mining_speed, resource_multiplier, people, food, tree, stone, oil, iron, gold) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)".format(buildings)
