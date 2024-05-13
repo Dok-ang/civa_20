@@ -51,14 +51,14 @@ options["text_size"]=Window.size[0]/15
 options["server_connect"]=False
 from kivy.uix.screenmanager import Screen, ScreenManager, WipeTransition, SlideTransition, FallOutTransition, CardTransition, SwapTransition
 import socket
-
+resourse={}
 def start_game():
     s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     with open("file/atile.json","r") as f:
         reg_options=f.read()
         while True:
             try:
-                s.connect(("80.77.36.110",2024))
+                s.connect(("134.249.176.108",2024))
                 break
             except:
                 pass     
@@ -79,14 +79,24 @@ def start_game():
         heapq.heappush(all_command,(all_priority["reboot"],time.time(),command))
     elif command["action"]=="update_resource":
         heapq.heappush(all_command,(all_priority["update_resource"],time.time(),command))
-    command={"action":"resource_mining"}
+    
+    
     date=json.dumps(command)
     s.close()
+    time_now=time.time()
 
+    for res in command["all_resource"]:
+        resource_mining_speed.setdefault(res[1],res[2]) # стандартний час збільшення ресурсів без впливу будівель
+        resource_time_mining_speed.setdefault(res[1],time_now) # час оновлення
+    print(resource_mining_speed)
+    print(resource_time_mining_speed)
+    s.close()
+    command={"action":"resource_mining"}
+"""
     s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     while True:
         try:
-            s.connect(("80.77.36.110",2024))
+            s.connect(("134.249.176.108",2024))
             break
         except:
             pass   
@@ -95,13 +105,7 @@ def start_game():
     date=s.recv(1024).decode("utf-8")
     mys=json.loads(date)
     #print(mys)
-    resource_mining_speed.update(mys)
-    time_now=time.time()
-    rtms={
-        "people":time_now,"food":time_now,"tree":time_now,"stone":time_now,
-        "oil":time_now,"iron":time_now,"gold":time_now}
-    resource_time_mining_speed.update(rtms)
-    s.close()
+ """
     
 
 class Policy(Screen): # ігровий клас
@@ -137,6 +141,7 @@ class Game(Screen): # ігровий клас
     def __init__(self): # конструктор класу
         Screen.__init__(self) # звертаємо до конструктора суперкласу
 
+        self.list_resource={"people":"-","food":"-","tree":"-","stone":"-","oil":"-","iron":"-","gold":"-"}
 
 
         box=BoxLayout(orientation="vertical",spacing=Window.size[1]//20+1)
@@ -265,18 +270,27 @@ class Game(Screen): # ігровий клас
         Clock.schedule_interval(self.update,1/60)
     def update(self,clock):
         if all_command:
+            print(0)
             _,_,command=heapq.heappop(all_command)
             if command["action"]=="reboot" or command["action"]=="update_resource":
-                self.people_button_text.text=str(command["people"])
-                self.tree_button_text.text=str(command["tree"])
-                self.iron_button_text.text=str(command["iron"])
-                self.stone_button_text.text=str(command["stone"])
-                self.oil_button_text.text=str(command["oil"])
-                self.gold_button_text.text=str(command["gold"])
-                self.food_button_text.text=str(command["food"])     
+                for res in self.list_resource:
+                    self.list_resource[res]=command[res]  
+        
+        time_now=time.time()
         if resource_mining_speed:
             for res in resource_time_mining_speed:
-                pass
+                if time_now-resource_time_mining_speed[res]>=resource_mining_speed[res]:
+                    self.list_resource[res]+=int((time_now-resource_time_mining_speed[res])//resource_mining_speed[res])
+                    resource_time_mining_speed[res]=time_now-(time_now-resource_time_mining_speed[res])%resource_mining_speed[res]
+    
+        self.people_button_text.text=str(self.list_resource["people"])
+        self.tree_button_text.text=str(self.list_resource["tree"])
+        self.iron_button_text.text=str(self.list_resource["iron"])
+        self.stone_button_text.text=str(self.list_resource["stone"])
+        self.oil_button_text.text=str(self.list_resource["oil"])
+        self.gold_button_text.text=str(self.list_resource["gold"])
+        self.food_button_text.text=str(self.list_resource["food"])   
+
 
     def go_menu(self,button):
         self.manager.current="menu"

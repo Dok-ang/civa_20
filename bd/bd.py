@@ -264,8 +264,8 @@ cursor.execute(command, data)
 cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
     id_infantryman INT AUTO_INCREMENT PRIMARY KEY,
     count INT,
-    buildings_time FLOAT,   
-    new_buildings_count INT,        
+    army_time FLOAT,   
+    new_army_count INT,        
     id_user INT,
     FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
 )""".format("infantryman",users)) # піхотинець
@@ -273,8 +273,8 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
 cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
     id_bowman INT AUTO_INCREMENT PRIMARY KEY,
     count INT,
-    buildings_time FLOAT,   
-    new_buildings_count INT,        
+    army_time FLOAT,   
+    new_army_count INT,        
     id_user INT,
     FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
 )""".format("bowman",users)) # лучник
@@ -282,8 +282,8 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
 cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
     id_berserker INT AUTO_INCREMENT PRIMARY KEY,
     count INT,
-    buildings_time FLOAT,   
-    new_buildings_count INT,        
+    army_time FLOAT,   
+    new_army_count INT,        
     id_user INT,
     FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
 )""".format("berserker",users)) # berserker
@@ -292,8 +292,8 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
 cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
     id_penny_pincher INT AUTO_INCREMENT PRIMARY KEY,
     count INT,
-    buildings_time FLOAT,   
-    new_buildings_count INT,        
+    army_time FLOAT,   
+    new_army_count INT,        
     id_user INT,
     FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
 )""".format("penny_pincher",users)) # penny_pincher
