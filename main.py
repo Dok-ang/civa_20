@@ -15,83 +15,83 @@ import threading
 import os
 import heapq
 import time
-all_command=[]
-all_priority={
+all_command = []
+all_priority = {
     "reboot":5,
     "update_resource":8,
     "donat":0
     }
-path=""
-if platform=="android":
-    path=os.path.abspath('')+"/"
+path = ""
+if platform == "android":
+    path = os.path.abspath('') + "/"
 
-if platform=="win":
-    w,h=pygame.display.Info().current_w,pygame.display.Info().current_h
-    Window.size=[w//2.5,h//6*4]
-    Window.left=w/2-Window.size[0]/2
-    Window.top=h/2-Window.size[1]/2
-resource_mining_speed={} # стандартний час збільшення ресурсів без впливу будівель
-resource_time_mining_speed={} # час оновлення
+if platform == "win":
+    w,h = pygame.display.Info().current_w, pygame.display.Info().current_h
+    Window.size = [w//2.5, h//6*4]
+    Window.left = w/2 - Window.size[0]/2
+    Window.top = h/2 - Window.size[1]/2
+resource_mining_speed = {} # стандартний час збільшення ресурсів без впливу будівель
+resource_time_mining_speed = {} # час оновлення
 import json
 #options={"volume":0.5}
 #file_options=open("options.txt","w")
 #file_options.write(json.dumps(options))
 #file_options.close()
-file_options=open(path+"file/options.json","r")
+file_options = open(path + "file/options.json", "r")
 #list_options=file_options.readlines()
-options=json.loads(file_options.read())
+options = json.loads(file_options.read())
 file_options.close()
-fon_music=pygame.mixer.Sound("music/something_lost-185380.mp3")
+fon_music = pygame.mixer.Sound("music/something_lost-185380.mp3")
 fon_music.play(-1)
 #fon_music.set_volume(float(list_options[0]))
 fon_music.set_volume(options["volume"])
 # 1 рядок гучність звуку
 #options={"text_size":Window.size[0]/15,"volume":float(list_options[0])}
-options["text_size"]=Window.size[0]/15
-options["server_connect"]=False
+options["text_size"] = Window.size[0]/15
+options["server_connect"] = False
 from kivy.uix.screenmanager import Screen, ScreenManager, WipeTransition, SlideTransition, FallOutTransition, CardTransition, SwapTransition
 import socket
-resourse={}
+resourse = {}
 def start_game():
-    s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-    with open("file/atile.json","r") as f:
-        reg_options=f.read()
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    with open("file/atile.json", "r") as f:
+        reg_options = f.read()
         while True:
             try:
-                s.connect(("134.249.176.108",2024))
+                s.connect(("134.249.176.108", 2024))
                 break
             except:
                 pass     
     #print(text)
     
     s.sendall(reg_options.encode("utf-8"))
-    reg_options=json.loads(reg_options)
-    date=s.recv(1024).decode("utf-8")
+    reg_options = json.loads(reg_options)
+    date = s.recv(1024).decode("utf-8")
     print(date)
-    command=json.loads(date)
-    if command["action"]=="reboot":
+    command = json.loads(date)
+    if command["action"] == "reboot":
         print("reboot")
-        reg_options["id"]=command["id"]
-        reg_options["token"]=command["token"]
-        with open("file/atile.json","w") as f:
+        reg_options["id"] = command["id"]
+        reg_options["token"] = command["token"]
+        with open("file/atile.json", "w") as f:
             f.write(json.dumps(reg_options))
             print("dumps")
-        heapq.heappush(all_command,(all_priority["reboot"],time.time(),command))
-    elif command["action"]=="update_resource":
-        heapq.heappush(all_command,(all_priority["update_resource"],time.time(),command))
+        heapq.heappush(all_command, (all_priority["reboot"], time.time(), command))
+    elif command["action"] == "update_resource":
+        heapq.heappush(all_command, (all_priority["update_resource"], time.time(), command))
     
     
-    date=json.dumps(command)
+    date = json.dumps(command)
     s.close()
-    time_now=time.time()
+    time_now = time.time()
 
     for res in command["all_resource"]:
-        resource_mining_speed.setdefault(res[1],res[2]) # стандартний час збільшення ресурсів без впливу будівель
-        resource_time_mining_speed.setdefault(res[1],time_now) # час оновлення
+        resource_mining_speed.setdefault(res[1], res[2]) # стандартний час збільшення ресурсів без впливу будівель
+        resource_time_mining_speed.setdefault(res[1], time_now) # час оновлення
     print(resource_mining_speed)
     print(resource_time_mining_speed)
     s.close()
-    command={"action":"resource_mining"}
+    command = {"action":"resource_mining"}
 """
     s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     while True:
@@ -109,48 +109,47 @@ def start_game():
     
 
 class Policy(Screen): # ігровий клас
-    name="policy" # ім'я гри для переходу між вікнами
+    name = "policy" # ім'я гри для переходу між вікнами
     def __init__(self): # конструктор класу
         Screen.__init__(self) # звертаємо до конструктора суперкласу
-        self.add_widget(Button(text="Політика",color=[1,1,0,1]))
+        self.add_widget(Button(text="Політика", color=[1,1,0,1]))
 class Trade(Screen): # ігровий клас
-    name="trade" # ім'я гри для переходу між вікнами
+    name = "trade" # ім'я гри для переходу між вікнами
     def __init__(self): # конструктор класу
         Screen.__init__(self) # звертаємо до конструктора суперкласу
-        self.add_widget(Button(text="Торгівля",color=[1,1,0,1]))
+        self.add_widget(Button(text="Торгівля", color=[1,1,0,1]))
 class Infrastructure(Screen): # ігровий клас
-    name="infrastructure" # ім'я гри для переходу між вікнами
+    name = "infrastructure" # ім'я гри для переходу між вікнами
     def __init__(self): # конструктор класу
         Screen.__init__(self) # звертаємо до конструктора суперкласу
-        self.add_widget(Button(text="Моя інфраструктура",color=[1,1,0,1]))
+        self.add_widget(Button(text="Моя інфраструктура", color=[1,1,0,1]))
 class Army(Screen): # ігровий клас
-    name="army" # ім'я гри для переходу між вікнами
+    name = "army" # ім'я гри для переходу між вікнами
     def __init__(self): # конструктор класу
         Screen.__init__(self) # звертаємо до конструктора суперкласу
-        self.add_widget(Button(text="Моя армія",color=[1,1,0,1]))
+        self.add_widget(Button(text="Моя армія", color=[1,1,0,1]))
 class City(Screen): # ігровий клас
-    name="city" # ім'я гри для переходу між вікнами
+    name = "city" # ім'я гри для переходу між вікнами
     def __init__(self): # конструктор класу
         Screen.__init__(self) # звертаємо до конструктора суперкласу
-        self.add_widget(Button(text="Моє місто",color=[1,1,0,1]))
+        self.add_widget(Button(text="Моє місто", color=[1,1,0,1]))
 
 
-thred_game=threading.Thread(target=start_game)
+thred_game = threading.Thread(target=start_game)
 class Game(Screen): # ігровий клас
-    name="game" # ім'я гри для переходу між вікнами
-    def __init__(self): # конструктор класу
+    name = "game" # ім'я гри для переходу між вікнами
+    def __init__(self):  # конструктор класу
         Screen.__init__(self) # звертаємо до конструктора суперкласу
 
-        self.list_resource={"people":"-","food":"-","tree":"-","stone":"-","oil":"-","iron":"-","gold":"-"}
+        self.list_resource = {"people":"-", "food":"-", "tree":"-", "stone":"-", "oil":"-", "iron":"-", "gold":"-"}
 
-
-        box=BoxLayout(orientation="vertical",spacing=Window.size[1]//20+1)
+        box = BoxLayout(orientation="vertical", spacing=Window.size[1]//20 + 1)
         
-        self.panel=BoxLayout(size_hint=[1,0.2])
+        self.panel = BoxLayout(size_hint=[1, 0.2])
 
-        button_menu=Button(text="Menu",font_size=options["text_size"],
-                           font_name="font/7fonts_Knight2.ttf",
-        color=[1,1,0,0.7],background_color=[0,0,0,0],on_press=self.go_menu) # кнопка переходу в гру
+        button_menu = Button(text="Menu", font_size=options["text_size"],
+                            font_name="font/7fonts_Knight2.ttf",
+                            color=[1,1,0,0.7], background_color=[0,0,0,0], on_press=self.go_menu) # кнопка переходу в гру
         self.panel.add_widget(button_menu)
 
 
