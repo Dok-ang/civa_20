@@ -1,310 +1,377 @@
 import mysql.connector
 # З'єднання з базою даних
 connection = mysql.connector.connect(
-    host='localhost',  # або 'localhost' для локального сервера
+    host='localhost',  # або 'ip' для локального сервера
     user='root',
-    password='root',
-    port=2023  # порт, на якому працює MySQL
+    password='admin',
+    port=9090  # порт, на якому працює MySQL
 )
 # Створення об'єкта курсора
 cursor = connection.cursor()
-# Створення бази даних (якщо її ще не існує)
-name_base="civilization"
-cursor.execute('DROP DATABASE IF EXISTS civilization')
+
+name_base="civilization3"
+cursor.execute("DROP DATABASE IF EXISTS {0}".format(name_base))
 connection.commit()
-create_database_query = "CREATE DATABASE IF NOT EXISTS {0}".format(name_base)
-cursor.execute(create_database_query)
-# Вибір бази даних
+
+cursor.execute("CREATE DATABASE IF NOT EXISTS {0}".format(name_base))
+
+# оберем базу
 cursor.execute("USE {0}".format(name_base))
+
+# створимо таблиці
 users="users"
 cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_user INT AUTO_INCREMENT PRIMARY KEY,
+    id_user INT PRIMARY KEY AUTO_INCREMENT,
     token VARCHAR(16) NOT NULL,
     name VARCHAR(32) NOT NULL,
-    email VARCHAR(50)
+    email VARCHAR(32) NOT NULL
 )""".format(users))
 
 resource="resource"
 cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_resource INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(32) NOT NULL,
-    mining_speed BIGINT
+    id_resource INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(16) NOT NULL,
+    mining_time BIGINT NOT NULL
 )""".format(resource))
 
-
 # Вставка даних в таблицю
-command = "INSERT INTO {0} (name, mining_speed) VALUES (%s, %s)".format(resource)
+command = "INSERT INTO {0} (name, mining_time) VALUES (%s, %s)".format(resource)
 data = ("people", 500)
-cursor.execute(command, data)
-data = ("food", 10)
 cursor.execute(command, data)
 data = ("tree", 60)
 cursor.execute(command, data)
 data = ("stone", 90)
 cursor.execute(command, data)
-data = ("oil", 450)
+data = ("food", 5)
 cursor.execute(command, data)
 data = ("iron", 150)
 cursor.execute(command, data)
 data = ("gold", 300)
 cursor.execute(command, data)
+data = ("oil", 450)
+cursor.execute(command, data)
 
 cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_people INT AUTO_INCREMENT PRIMARY KEY,
+    id_people INT PRIMARY KEY AUTO_INCREMENT,
     count INT,
-    last_update INT,
+    last_update INT,           
     id_user INT,
-    FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
-)""".format("people",users))
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("people"))
 
 cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_food INT AUTO_INCREMENT PRIMARY KEY,
+    id_tree INT PRIMARY KEY AUTO_INCREMENT,
     count INT,
-    last_update INT,
+    last_update INT, 
     id_user INT,
-    FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
-)""".format("food",users))
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("tree"))
 
 cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_tree INT AUTO_INCREMENT PRIMARY KEY,
+    id_food INT PRIMARY KEY AUTO_INCREMENT,
     count INT,
-    last_update INT,
+    last_update INT, 
     id_user INT,
-    FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
-)""".format("tree",users))
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("food"))
 
 cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_stone INT AUTO_INCREMENT PRIMARY KEY,
+    id_iron INT PRIMARY KEY AUTO_INCREMENT,
     count INT,
-    last_update INT,
+    last_update INT, 
     id_user INT,
-    FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
-)""".format("stone",users))
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("iron"))
 
 cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_oil INT AUTO_INCREMENT PRIMARY KEY,
+    id_stone INT PRIMARY KEY AUTO_INCREMENT,
     count INT,
-    last_update INT,
+    last_update INT, 
     id_user INT,
-    FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
-)""".format("oil",users))
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("stone"))
 
 cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_iron INT AUTO_INCREMENT PRIMARY KEY,
+    id_gold INT PRIMARY KEY AUTO_INCREMENT,
     count INT,
-    last_update INT,
+    last_update INT, 
     id_user INT,
-    FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
-)""".format("iron",users))
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("gold"))
 
 cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_gold INT AUTO_INCREMENT PRIMARY KEY,
+    id_oil INT PRIMARY KEY AUTO_INCREMENT,
     count INT,
-    last_update INT,
+    last_update INT, 
     id_user INT,
-    FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
-)""".format("gold",users))
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("oil"))
+
+
 
 
 buildings="buildings"
 cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_building INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(32) NOT NULL,
-    mining_speed INT NOT NULL,   
-    resource_multiplier INT NOT NULL,   
+    id_buildings INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(16) NOT NULL,
+    mining_time BIGINT NOT NULL,
+    application_of_resources INT NOT NULL,
     people INT NOT NULL,
-    food INT NOT NULL,
     tree INT NOT NULL,
     stone INT NOT NULL,
-    oil INT NOT NULL,
+    food INT NOT NULL,
     iron INT NOT NULL,
-    gold INT NOT NULL  )""".format(buildings))
-# mining_speed - швидкість побудови
-# resource_multiplier - множник за кожен ресурс
+    gold INT NOT NULL,
+    oil INT NOT NULL           
+)""".format(buildings))
+# mining_time - час побудови будинку
+# application_of_resources - на скільки збільшуємо видобудок ресурсів за вказану будівлю
 
 # Вставка даних в таблицю
-command = "INSERT INTO {0} (name, mining_speed, resource_multiplier, people, food, tree, stone, oil, iron, gold) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)".format(buildings)
-data = ("farm", 1000, 1, 2, 1, 10, 5, 0, 0, 50)
+command = "INSERT INTO {0} (name, mining_time, application_of_resources, people, tree, stone, food, iron, gold, oil) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)".format(buildings)
+data = ("sawmill", 1000, 2, 4, 20, 2, 0, 2, 50, 0)
 cursor.execute(command, data)
-data = ("sawmill", 1000, 1, 2, 1, 10, 5, 0, 0, 50)
+data = ("mine", 1000, 2, 4, 20, 2, 0, 2, 50, 0)
 cursor.execute(command, data)
-data = ("mine_stone", 1000, 1, 2, 1, 10, 5, 0, 0, 50)
+data = ("farm", 1000, 2, 4, 20, 2, 0, 2, 50, 0)
 cursor.execute(command, data)
-data = ("oil_well", 1000, 1, 2, 1, 10, 5, 0, 0, 50)
+data = ("smithy", 1000, 2, 4, 20, 2, 0, 2, 50, 0)
 cursor.execute(command, data)
-data = ("mine_iron", 1000, 1, 2, 1, 10, 5, 0, 0, 50)
+data = ("bank", 1000, 2, 4, 20, 2, 0, 2, 50, 0)
 cursor.execute(command, data)
-data = ("mine_gold", 1000, 1, 2, 1, 10, 5, 0, 0, 50)
+data = ("oil_rig", 1000, 2, 4, 20, 2, 0, 2, 50, 0)
 cursor.execute(command, data)
-
-data = ("barrack_infantryman", 1000, 1, 2, 1, 10, 5, 0, 0, 50)
+data = ("barrack", 1000, 2, 4, 20, 2, 0, 2, 50, 0)
 cursor.execute(command, data)
-data = ("shooting_range", 1000, 1, 2, 1, 10, 5, 0, 0, 50)
+data = ("shooting_gallery", 1000, 2, 4, 20, 2, 0, 2, 50, 0)
 cursor.execute(command, data)
-data = ("barrack_berserker", 1000, 1, 2, 1, 10, 5, 0, 0, 50)
+data = ("polygon", 1000, 2, 4, 20, 2, 0, 2, 50, 0)
+cursor.execute(command, data)
+data = ("post_office", 1000, 2, 4, 20, 2, 0, 2, 50, 0)
+cursor.execute(command, data)
+data = ("tank_factory", 1000, 2, 4, 20, 2, 0, 2, 50, 0)
+cursor.execute(command, data)
+data = ("airfield", 1000, 2, 4, 20, 2, 0, 2, 50, 0)
 cursor.execute(command, data)
 
 cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_farm INT AUTO_INCREMENT PRIMARY KEY,
+    id_sawmill INT PRIMARY KEY AUTO_INCREMENT,
     count INT,
-    buildings_time FLOAT,   
-    new_buildings_count INT,        
+    buildings_start_time FLOAT,
+    new_buildings_count INT,      
     id_user INT,
-    FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
-)""".format("farm",users)) # ферма
-
-cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_sawmill INT AUTO_INCREMENT PRIMARY KEY,
-    count INT,
-    buildings_time FLOAT,   
-    new_buildings_count INT,        
-    id_user INT,
-    FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
-)""".format("sawmill",users)) # лісопилка
-
-cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_mine_stone INT AUTO_INCREMENT PRIMARY KEY,
-    count INT,
-    buildings_time FLOAT,   
-    new_buildings_count INT,        
-    id_user INT,
-    FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
-)""".format("mine_stone",users)) # шахтя камня
-
-cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_oil_well INT AUTO_INCREMENT PRIMARY KEY,
-    count INT,
-    buildings_time FLOAT,   
-    new_buildings_count INT,        
-    id_user INT,
-    FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
-)""".format("oil_well",users)) # нафта
-
-cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_mine_iron INT AUTO_INCREMENT PRIMARY KEY,
-    count INT,
-    buildings_time FLOAT,   
-    new_buildings_count INT,        
-    id_user INT,
-    FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
-)""".format("mine_iron",users)) # шахтя заліза
-
-cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_mine_gold INT AUTO_INCREMENT PRIMARY KEY,
-    count INT,
-    buildings_time FLOAT,   
-    new_buildings_count INT,        
-    id_user INT,
-    FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
-)""".format("mine_gold",users)) # шахтя золота
-
-
-
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("sawmill")) # лісопилка
 
 
 cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_barrack_infantryman INT AUTO_INCREMENT PRIMARY KEY,
+    id_mine INT PRIMARY KEY AUTO_INCREMENT,
     count INT,
-    buildings_time FLOAT,   
-    new_buildings_count INT,        
+    buildings_start_time FLOAT,
+    new_buildings_count INT,      
     id_user INT,
-    FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
-)""".format("barrack_infantryman",users)) # казарма
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("mine")) # шахта камня
 
 cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_shooting_range INT AUTO_INCREMENT PRIMARY KEY,
+    id_farm INT PRIMARY KEY AUTO_INCREMENT,
     count INT,
-    buildings_time FLOAT,   
-    new_buildings_count INT,        
+    buildings_start_time FLOAT,
+    new_buildings_count INT,      
     id_user INT,
-    FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
-)""".format("shooting_range",users)) # 
-
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("farm")) # ферма
 
 cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_barrack_berserker INT AUTO_INCREMENT PRIMARY KEY,
+    id_smithy INT PRIMARY KEY AUTO_INCREMENT,
     count INT,
-    buildings_time FLOAT,   
-    new_buildings_count INT,        
+    buildings_start_time FLOAT,
+    new_buildings_count INT,      
     id_user INT,
-    FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
-)""".format("barrack_berserker",users)) # 
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("smithy")) # кузня заліза
 
+cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
+    id_bank INT PRIMARY KEY AUTO_INCREMENT,
+    count INT,
+    buildings_start_time FLOAT,
+    new_buildings_count INT,      
+    id_user INT,
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("bank")) # банк
+
+cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
+    id_oil_rig INT PRIMARY KEY AUTO_INCREMENT,
+    count INT,
+    buildings_start_time FLOAT,
+    new_buildings_count INT,      
+    id_user INT,
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("oil_rig")) # нафтовишка
+
+cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
+    id_barrack INT PRIMARY KEY AUTO_INCREMENT,
+    count INT,
+    buildings_start_time FLOAT,
+    new_buildings_count INT,      
+    id_user INT,
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("barrack")) # казарма
+
+cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
+    id_airfield INT PRIMARY KEY AUTO_INCREMENT,
+    count INT,
+    buildings_start_time FLOAT,
+    new_buildings_count INT,      
+    id_user INT,
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("airfield"))
+
+cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
+    id_tank_factory INT PRIMARY KEY AUTO_INCREMENT,
+    count INT,
+    buildings_start_time FLOAT,
+    new_buildings_count INT,      
+    id_user INT,
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("tank_factory"))
+
+cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
+    id_polygon INT PRIMARY KEY AUTO_INCREMENT,
+    count INT,
+    buildings_start_time FLOAT,
+    new_buildings_count INT,      
+    id_user INT,
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("polygon")) # полігон
+
+cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
+    id_post_office INT PRIMARY KEY AUTO_INCREMENT,
+    count INT,
+    buildings_start_time FLOAT,
+    new_buildings_count INT,      
+    id_user INT,
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("post_office")) # офіс перевозчиків
+
+cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
+    id_shooting_gallery INT PRIMARY KEY AUTO_INCREMENT,
+    count INT,
+    buildings_start_time FLOAT,
+    new_buildings_count INT,      
+    id_user INT,
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("shooting_gallery")) # тир
+
+cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
+    id_tank_factory INT PRIMARY KEY AUTO_INCREMENT,
+    count INT,
+    buildings_start_time FLOAT,
+    new_buildings_count INT,      
+    id_user INT,
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("tank_factory")) # завод танків
+
+cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
+    id_airfield INT PRIMARY KEY AUTO_INCREMENT,
+    count INT,
+    buildings_start_time FLOAT,
+    new_buildings_count INT,      
+    id_user INT,
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("airfield")) # аеродром
 
 army="army"
 cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_army INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(32) NOT NULL,
-    mining_speed BIGINT NOT NULL,
-    strength INT NOT NULL,
+    id_army INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(16) NOT NULL,
+    mining_time BIGINT NOT NULL,
     hp INT NOT NULL,
-    protection INT NOT NULL,
-    theft INT NOT NULL,
-    attack_defense_ratio FLOAT NOT NULL,
-    service INT NOT NULL,
+    armor INT NOT NULL,
+    power INT NOT NULL,
+    capacity INT NOT NULL,
+    coefficient FLOAT NOT NULL,
+    maintenance INT NOT NULL,
     people INT NOT NULL,
-    food INT NOT NULL,
     tree INT NOT NULL,
     stone INT NOT NULL,
-    oil INT NOT NULL,
+    food INT NOT NULL,
     iron INT NOT NULL,
-    gold INT NOT NULL
+    gold INT NOT NULL,
+    oil INT NOT NULL
 )""".format(army))
-# protection у відсотках
-
+# capacity - місткість
+# coefficient 0.5 - +50% до захисту та -50% до атаки, 1.5 - -50% до захисту та +50% до атаки
 # Вставка даних в таблицю
-command = "INSERT INTO {0} (name, mining_speed, strength, hp, protection, theft, attack_defense_ratio, service, people, food, tree, stone, oil, iron, gold) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)".format(army)
-data = ("infantryman", 600, 60, 200, 20, 2, 1, 1, 1, 2, 2, 0, 0, 0, 50)
+command = "INSERT INTO {0} (name, mining_time, hp, armor, power, capacity, coefficient, maintenance, people, tree, stone, food, iron, gold, oil) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)".format(army)
+data = ("knight", 1000, 100, 20, 60, 2, 1, 1, 1, 1, 1, 2, 0, 50, 0)
 cursor.execute(command, data)
-data = ("bowman", 600, 60, 200, 20, 2, 1, 1, 0.8, 2, 2, 0, 0, 0, 50)
+data = ("assault_infantry", 1000, 100, 20, 60, 2, 1, 1, 1, 1, 1, 2, 0, 50, 0)
 cursor.execute(command, data)
-data = ("berserker", 600, 60, 200, 20, 2, 1, 1, 1.2, 2, 2, 0, 0, 0, 50)
+data = ("shooter", 1000, 100, 20, 60, 2, 1, 1, 1, 1, 1, 2, 0, 50, 0)
+cursor.execute(command, data)
+data = ("postman", 1000, 100, 20, 60, 2, 1, 1, 1, 1, 1, 2, 0, 50, 0)
+cursor.execute(command, data)
+data = ("tank", 1000, 100, 20, 60, 2, 1, 1, 1, 1, 1, 2, 0, 50, 0)
+cursor.execute(command, data)
+data = ("plane", 1000, 100, 20, 60, 2, 1, 1, 1, 1, 1, 2, 0, 50, 0)
 cursor.execute(command, data)
 
 cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_infantryman INT AUTO_INCREMENT PRIMARY KEY,
+    id_knight INT PRIMARY KEY AUTO_INCREMENT,
     count INT,
-    buildings_time FLOAT,   
-    new_buildings_count INT,        
+    army_start_time FLOAT,
+    new_army_count INT,      
     id_user INT,
-    FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
-)""".format("infantryman",users)) # піхотинець
-
-cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_bowman INT AUTO_INCREMENT PRIMARY KEY,
-    count INT,
-    buildings_time FLOAT,   
-    new_buildings_count INT,        
-    id_user INT,
-    FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
-)""".format("bowman",users)) # лучник
-
-cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_berserker INT AUTO_INCREMENT PRIMARY KEY,
-    count INT,
-    buildings_time FLOAT,   
-    new_buildings_count INT,        
-    id_user INT,
-    FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
-)""".format("berserker",users)) # berserker
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("knight")) # лицар
 
 
 cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
-    id_penny_pincher INT AUTO_INCREMENT PRIMARY KEY,
+    id_assault_infantry INT PRIMARY KEY AUTO_INCREMENT,
     count INT,
-    buildings_time FLOAT,   
-    new_buildings_count INT,        
+    army_start_time FLOAT,
+    new_army_count INT,      
     id_user INT,
-    FOREIGN KEY (id_user)  REFERENCES {1}(id_user) ON DELETE CASCADE ON UPDATE CASCADE                   
-)""".format("penny_pincher",users)) # penny_pincher
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("assault_infantry")) # штурмова піхота
 
+cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
+    id_shooter INT PRIMARY KEY AUTO_INCREMENT,
+    count INT,
+    army_start_time FLOAT,
+    new_army_count INT,      
+    id_user INT,
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("shooter")) # стрелок
 
-#cursor.execute('DELETE FROM people WHERE user_id = %s',('admin'))
+cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
+    id_postman INT PRIMARY KEY AUTO_INCREMENT,
+    count INT,
+    army_start_time FLOAT,
+    new_army_count INT,      
+    id_user INT,
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("postman")) # стрелок
 
+cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
+    id_tank INT PRIMARY KEY AUTO_INCREMENT,
+    count INT,
+    army_start_time FLOAT,
+    new_army_count INT,      
+    id_user INT,
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("tank")) # танк
 
-# Підтвердження змін
+cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
+    id_plane INT PRIMARY KEY AUTO_INCREMENT,
+    count INT,
+    army_start_time FLOAT,
+    new_army_count INT,      
+    id_user INT,
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE ON UPDATE CASCADE         
+)""".format("plane")) # літак
+
 connection.commit()
-
-# Закриття курсора та з'єднання
 cursor.close()
 connection.close()

@@ -3,10 +3,10 @@ import mysql.connector
 # З'єднання з базою даних
 connection = mysql.connector.connect(
     host='localhost',  # або 'localhost' для локального сервера 134.249.176.108
-    user='root',
-    password='root',
-    database='civilization', # Sakila server_database
-    port=2023  # порт, на якому працює MySQL
+    user='admin',
+    password='admin',
+    database='civilization3', # Sakila server_database
+    port=4539  # порт, на якому працює MySQL
 )
 
 # Створення курсора для виконання SQL-запитів
@@ -47,42 +47,3 @@ for table in tables:
 # Закриття курсора та з'єднання
 cursor.close()
 connection.close()
-
-
-
-import asyncio
-import aiomysql
-
-async def handle_client(reader, writer):
-    # Отримуємо дані від клієнта
-    data = await reader.read(100)
-    message = data.decode()
-    addr = writer.get_extra_info('peername')
-    print(f"Received {message} from {addr}")
-
-    # Підключаємось до бази даних
-    async with aiomysql.connect(host='localhost', port=3306,
-                                 user='user', password='password',
-                                 db='database') as conn:
-        async with conn.cursor() as cursor:
-            # Виконуємо запит до бази даних
-            await cursor.execute("SELECT * FROM table")
-            result = await cursor.fetchall()
-            print("Received data from database:", result)
-
-    # Надсилаємо відповідь клієнту
-    response = "Hello from server!"
-    writer.write(response.encode())
-    await writer.drain()
-
-    # Закриваємо з'єднання
-    writer.close()
-
-async def main():
-    server = await asyncio.start_server(
-        handle_client, '127.0.0.1', 8888)
-
-    async with server:
-        await server.serve_forever()
-
-asyncio.run(main())
